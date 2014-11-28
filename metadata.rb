@@ -11,6 +11,7 @@ version '2.4.0'
 end
 
 depends 'python'
+depends 'apt'
 
 recommends 'curl'
 
