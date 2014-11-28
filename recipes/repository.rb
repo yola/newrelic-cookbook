@@ -12,28 +12,13 @@ end
 
 case node['platform']
 when 'debian', 'ubuntu'
-  # trust the New Relic GPG Key
-  # this step is required to tell apt that you trust the integrity of New Relic's apt repository
-  gpg_key_url = "http://download.newrelic.com/#{node['newrelic']['repository']['repository_key']}.gpg"
-  gpg_key_file = "#{Chef::Config[:file_cache_path]}/#{node['newrelic']['repository']['repository_key']}.gpg"
 
-  remote_file gpg_key_file do
-    source gpg_key_url
-    action :create
-  end
-
-  execute 'newrelic-add-apt-key' do
-    command "apt-key add #{gpg_key_file}"
-  end
-
-  # configure the New Relic apt repository
-  remote_file '/etc/apt/sources.list.d/newrelic.list' do
-    source 'http://download.newrelic.com/debian/newrelic.list'
-    owner 'root'
-    group 'root'
-    mode 0644
-    notifies :run, 'execute[newrelic-apt-get-update]', :immediately
-    action :create_if_missing
+  apt_repository "newrelic" do
+    uri "http://apt.newrelic.com/debian/"
+    distribution "newrelic"
+    components ["non-free"]
+    keyserver "keyserver.ubuntu.com"
+    key node['newrelic']['repository']['repository_key']
   end
 
   execute 'newrelic-apt-get-update' do
